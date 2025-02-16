@@ -1,0 +1,1 @@
+pip install opencv-python dlib imutils numpy scipy
