@@ -1,0 +1,30 @@
+/* MapWallpaper.css */
+.map-wallpaper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+  }
+  
+  .map-wallpaper__iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Prevent map interaction */
+    filter: grayscale(30%);
+    opacity: 0.9;
+  }
+  
+  .map-wallpaper__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  

@@ -1,6 +1,53 @@
-.frame {
-  border-radius: 9999px;
-  height: 50%;
-  width: 50%;
+.user-stuff {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: row;
+  gap: 20px;
+  margin-top: 80px;
+  width: 100%;
+}
+
+.user-stuff > * {
+  margin: 12px;
   
 }
+
+.frame-container {
+  height: 300px;
+  width: 300px;
+  position: relative;
+  border-radius: 9999px;
+  position: relative;
+  overflow: hidden;
+ 
+}
+.frame {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: rgba(0, 0, 0, 0.474);
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  
+}
+
+.user-info > * {
+  margin: 0;
+  margin-top: 10px;
+}
+

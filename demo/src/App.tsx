@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { firestore } from "./firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { useGeolocated } from "react-geolocated";
+import "./App.css";
+import { MapWallpaper } from "./components/MapWallpaper";
 
 export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -9,6 +12,10 @@ export default function App() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [user, setUser] = useState<string | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+
+  const { coords } = useGeolocated();
 
   useEffect(() => {
     if (isStreaming) {
@@ -116,44 +123,59 @@ export default function App() {
     }
   }, [user, isStreaming]);
 
+  useEffect(() => {
+    if (coords) {
+      setLongitude(coords.longitude);
+      setLatitude(coords.latitude);
+    }
+  }, [coords]);
+
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h1>User: {user ?? "N/A"}</h1>
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        style={{ width: "100%", borderRadius: "8px" }}
-      />
-      <h1>{parseFloat(ear ?? "0") < 0.2 ? "Drowsiness" : ""}</h1>
-      <h3>EAR: {ear ?? "N/A"}</h3>
-      <h6>
-        Eye Aspect Ratio (EAR) is a measure of the eye openness. A lower EAR
-        value indicates the eyes are closed or almost
-      </h6>
-      <div>
-        <button
-          onClick={() => {
-            startCamera();
-          }}
-        >
-          Start
-        </button>
-        <button
-          onClick={() => {
-            stopCamera();
-          }}
-        >
-          Stop
-        </button>
-        <button
-          onClick={() => {
-            if (imageBase64) verifyUser(imageBase64);
-          }}
-        >
-          Verify User
-        </button>
+    <div>
+      <div className="user-stuff">
+        <div className="frame-container">
+          <video ref={videoRef} autoPlay playsInline className="frame" />
+        </div>
+        <div className="vertical-line"></div>
+        <div className="user-info">
+          <h4>EAR: {ear ?? "N/A"}</h4>
+          <h4>User: {user ?? "N/A"}</h4>
+          <h4>
+            sleepiness: {parseFloat(ear ?? "0") < 0.2 ? "sleepy" : "active"}
+          </h4>
+          <h5>Longitude: {longitude}</h5>
+          <h5>Latitude: {latitude}</h5>
+          <div className="buttons">
+            <button
+              onClick={() => {
+                startCamera();
+              }}
+            >
+              Start
+            </button>
+            <button
+              onClick={() => {
+                stopCamera();
+              }}
+            >
+              Stop
+            </button>
+            <button
+              onClick={() => {
+                if (imageBase64) verifyUser(imageBase64);
+              }}
+            >
+              Verify User
+            </button>
+          </div>
+        </div>
       </div>
+      <MapWallpaper
+        latitude={latitude ?? 0}
+        longitude={longitude ?? 0}
+        opacity={0.2}
+        blur="0px"
+      />
     </div>
   );
 }
