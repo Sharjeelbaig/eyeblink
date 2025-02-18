@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { firestore } from "./firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ear, setEar] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
     if (isStreaming) {
@@ -16,11 +20,15 @@ export default function App() {
   const startCamera = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     if (videoRef.current) videoRef.current.srcObject = stream;
+    // set stream true if the camera is on
+    if (stream) setIsStreaming(true);
   };
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject as MediaStream;
     stream?.getTracks().forEach((track) => track.stop());
+    // set stream false if the camera is off
+    setIsStreaming(false);
   };
 
   const sendFrame = async () => {
@@ -33,7 +41,10 @@ export default function App() {
     context.drawImage(videoRef.current, 0, 0);
     const imageBase64 = canvas.toDataURL("image/jpeg").split(",")[1];
     console.log(imageBase64);
+    setImageBase64(imageBase64);
+  };
 
+  const getEAR = async (imageBase64: string) => {
     let data = JSON.stringify({
       image: imageBase64,
     });
@@ -59,8 +70,55 @@ export default function App() {
       });
   };
 
+  const verifyUser = async (imageBase64: string) => {
+    const querySnapshot = await getDocs(collection(firestore, "Users"));
+    querySnapshot.forEach(async (doc: any) => {
+      if (!doc.data().base64) return;
+      let data = JSON.stringify({
+        image1: doc.data().base64,
+        image2: imageBase64,
+      });
+      let config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:5001/compare",
+        headers: {
+          "Content-Type": "text/plain",
+          "content-type": "application/json",
+        },
+        data: data,
+      };
+      await axios
+        .request(config)
+        .then((response) => {
+          if (response.data === "OK") {
+            setUser(doc.data().name);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
+  };
+
+  useEffect(() => {
+    if (imageBase64) {
+      getEAR(imageBase64)?.then(() => {});
+    }
+  }, [imageBase64]);
+
+  useEffect(() => {
+    // recognize the user if the user is null
+    if (isStreaming) {
+      if (!user) {
+        verifyUser(imageBase64 ?? "");
+      }
+    }
+  }, [user, isStreaming]);
+
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
+      <h1>User: {user ?? "N/A"}</h1>
       <video
         ref={videoRef}
         autoPlay
@@ -77,7 +135,6 @@ export default function App() {
         <button
           onClick={() => {
             startCamera();
-            setIsStreaming(true);
           }}
         >
           Start
@@ -85,10 +142,16 @@ export default function App() {
         <button
           onClick={() => {
             stopCamera();
-            setIsStreaming(false);
           }}
         >
           Stop
+        </button>
+        <button
+          onClick={() => {
+            if (imageBase64) verifyUser(imageBase64);
+          }}
+        >
+          Verify User
         </button>
       </div>
     </div>

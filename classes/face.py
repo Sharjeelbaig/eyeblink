@@ -34,7 +34,7 @@ class FaceComparer:
             return "No faces found in one or both images."
 
         match = face_recognition.compare_faces([face_encoding1[0]], face_encoding2[0])
-        return "The faces match!" if match[0] else "The faces do not match."
+        return "OK" if match[0] else "The faces do not match."
     
     def compare_faces_from_base64(self, image1_base64, image2_base64):
         img1 = self.converter.base64_to_image(image1_base64)
@@ -47,7 +47,7 @@ class FaceComparer:
             return "No faces found in one or both images."
 
         match = face_recognition.compare_faces([face_encoding1[0]], face_encoding2[0])
-        return "The faces match!" if match[0] else "The faces do not match."
+        return "OK" if match[0] else "The faces do not match."
 
 
 # Example usage

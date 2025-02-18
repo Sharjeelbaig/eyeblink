@@ -9,7 +9,7 @@ from classes.face import FaceComparer
 from classes.ear import EARCalculator
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/ear": {"origins": "*"}})
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 ear_calculator = EARCalculator('./model.dat')
 
